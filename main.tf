@@ -97,11 +97,12 @@ resource "aws_instance" "bastion" {
     } 
 
 
-      user_data = <<-EOF
+    /*  user_data = <<-EOF
               #!/bin/bash
               sudo yum update -y
               sudo yum install google-authenticator -y
-              EOF 
+              EOF */
+
 }
 
 ###Private Security Group 
@@ -118,16 +119,7 @@ resource "aws_wafv2_web_acl" "firewall" {  ##Web based application Firewall
   default_action {
     allow {}
   }
-
-  visibility_config {
-    sampled_requests_enabled = true
-    cloudwatch_metrics_enabled = true
-    metric_name = "FirewallMetric"
-  }
 }
-
-# Associate WAF with Bastion Host (Example using ALB or similar needed in real case)
-# Note: This part is simplified and needs appropriate setup with resources like ALBs.
 
 output "bastion_public_ip" {
   value = aws_instance.bastion.public_ip
