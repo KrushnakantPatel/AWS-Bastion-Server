@@ -1,5 +1,10 @@
 This is the demo if we need more than one subnets(Public and Private) then we can change the script accordingly
 
+#Keywords used
+# Terraform looping with count: Uses count to repeat resource creation
+#count.index is the loop variable representing the current iteration 
+# "${count.index +1}" dynamically appends a number to each subnet's name, etc 
+
 
 # Public Subnets (Automated for multiple subnets)
 resource "aws_subnet" "public" {
