@@ -1,7 +1,7 @@
-
 variable "aws_region" {
     description = "AWS Region to delpoy the resources"
-    default = "us-east-1"  
+    default = "us-east-1" 
+     
 }
 
 variable "vpc_cidr" {
@@ -17,11 +17,13 @@ variable "public_subnet_cidr" {
 variable "private_subnet-cidr" {
   description = "CIDR block for the private subnet"
   default = "10.0.2.0/24"
+
 }
 
 variable "trusted_ips" {
     description = "List of trusted IPs for the SSH access"
     type = list(string)
+    default = [ "10.0.5.0/24" ]
   
 }
 
@@ -37,5 +39,6 @@ variable "bastion_instance_type" {
 
 variable "ssh_key_name" {
   description = "SSH key name for accessing instances"
+  
 }
 
