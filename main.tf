@@ -1,6 +1,12 @@
 # Configure the AWS Provider
 provider "aws" {
   region = var.aws_region
+  #The below 5 lines are added when in case you don't have or for some reason aws account is not working this is the way you can check your terraform script by terraform plan 
+  skip_credentials_validation = true
+  access_key = "12345"
+  secret_key = "12345"
+  skip_requesting_account_id = true
+  skip_metadata_api_check = true   
 }
 
 #Configure the VPC
@@ -46,9 +52,9 @@ resource "aws_internet_gateway" "igw" {
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
 
-  route = {
+  route  {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gatewayigw.id
+    gateway_id = aws_internet_gateway.igw.id
   }
 
   tags = {
@@ -64,6 +70,7 @@ resource "aws_route_table_association" "public" {
 ##Bastion Security Group 
 resource "aws_security_group" "bastion_sg" {
     vpc_id = aws_vpc.main.id
+    
 
     ingress {
         description = "allow SSH from the trusted or allowed IPs"
@@ -73,7 +80,7 @@ resource "aws_security_group" "bastion_sg" {
         cidr_blocks = var.trusted_ips
     }
 
-    egress = {
+    egress  {
         from_port = 0
         to_port = 0
         protocol = "-1"
@@ -91,18 +98,18 @@ resource "aws_instance" "bastion" {
     instance_type = var.bastion_instance_type
     subnet_id = aws_subnet.public.id
     security_groups = [aws_security_group.bastion_sg.id]
+    key_name = var.ssh_key_name.id 
     
     tags = {
       Name = "Bastion Host"
     } 
 
-
-    /*  user_data = <<-EOF
+      #The below 5 lines are for google authentication 
+      user_data = <<-EOF
               #!/bin/bash
               sudo yum update -y
               sudo yum install google-authenticator -y
-              EOF */
-
+              EOF 
 }
 
 ###Private Security Group 
@@ -119,7 +126,16 @@ resource "aws_wafv2_web_acl" "firewall" {  ##Web based application Firewall
   default_action {
     allow {}
   }
+
+  visibility_config {
+    sampled_requests_enabled = true
+    cloudwatch_metrics_enabled = true
+    metric_name = "FirewallMetric"
+  }
 }
+
+# Associate WAF with Bastion Host (Example using ALB or similar needed in real case)
+# Note: This part is simplified and needs appropriate setup with resources like ALBs.
 
 output "bastion_public_ip" {
   value = aws_instance.bastion.public_ip
